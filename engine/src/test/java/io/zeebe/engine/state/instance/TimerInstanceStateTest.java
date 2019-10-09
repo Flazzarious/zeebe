@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.zeebe.engine.state.ZeebeState;
 import io.zeebe.engine.util.ZeebeStateRule;
+import io.zeebe.protocol.impl.record.value.timer.TimerRecord.TimerType;
 import java.util.ArrayList;
 import java.util.List;
 import org.assertj.core.api.Assertions;
@@ -37,6 +38,7 @@ public class TimerInstanceStateTest {
     timer.setElementInstanceKey(1L);
     timer.setKey(2L);
     timer.setDueDate(1000L);
+    timer.setTimerType(TimerType.EVENT_SUBPROC);
     state.put(timer);
 
     // when
@@ -50,6 +52,7 @@ public class TimerInstanceStateTest {
     Assertions.assertThat(readTimer.getElementInstanceKey()).isEqualTo(1L);
     Assertions.assertThat(readTimer.getKey()).isEqualTo(2L);
     Assertions.assertThat(readTimer.getDueDate()).isEqualTo(1000L);
+    Assertions.assertThat(readTimer.getTimerType()).isEqualTo(TimerType.EVENT_SUBPROC);
   }
 
   @Test
@@ -58,17 +61,20 @@ public class TimerInstanceStateTest {
     final TimerInstance timer1 = new TimerInstance();
     timer1.setElementInstanceKey(1L);
     timer1.setDueDate(1000L);
+    timer1.setTimerType(TimerType.EVENT_SUBPROC);
     state.put(timer1);
 
     final TimerInstance timer2 = new TimerInstance();
     timer2.setElementInstanceKey(2L);
     timer2.setDueDate(2000L);
+    timer2.setTimerType(TimerType.START);
     state.put(timer2);
 
     // when
     final TimerInstance timer = new TimerInstance();
     timer.setElementInstanceKey(1L);
     timer.setDueDate(1000L);
+    timer.setTimerType(TimerType.CATCH);
     state.remove(timer);
 
     // then
@@ -87,6 +93,7 @@ public class TimerInstanceStateTest {
     timer.setWorkflowInstanceKey(1L);
     timer.setKey(2L);
     timer.setDueDate(1000L);
+    timer.setTimerType(TimerType.EVENT_SUBPROC);
     state.put(timer);
 
     // when
@@ -98,6 +105,7 @@ public class TimerInstanceStateTest {
     Assertions.assertThat(readTimer.getKey()).isEqualTo(2L);
     Assertions.assertThat(readTimer.getWorkflowInstanceKey()).isEqualTo(1L);
     Assertions.assertThat(readTimer.getDueDate()).isEqualTo(1000L);
+    Assertions.assertThat(readTimer.getTimerType()).isEqualTo(TimerType.EVENT_SUBPROC);
 
     // and
     Assertions.assertThat(state.get(2L, 1L)).isNull();
@@ -109,16 +117,19 @@ public class TimerInstanceStateTest {
     final TimerInstance timer1 = new TimerInstance();
     timer1.setElementInstanceKey(1L);
     timer1.setDueDate(1000L);
+    timer1.setTimerType(TimerType.START);
     state.put(timer1);
 
     final TimerInstance timer2 = new TimerInstance();
     timer2.setElementInstanceKey(2L);
     timer2.setDueDate(2000L);
+    timer2.setTimerType(TimerType.EVENT_SUBPROC);
     state.put(timer2);
 
     final TimerInstance timer3 = new TimerInstance();
     timer3.setElementInstanceKey(3L);
     timer3.setDueDate(3000L);
+    timer3.setTimerType(TimerType.CATCH);
     state.put(timer3);
 
     // when
@@ -136,16 +147,19 @@ public class TimerInstanceStateTest {
     final TimerInstance timer1 = new TimerInstance();
     timer1.setElementInstanceKey(1L);
     timer1.setDueDate(1000L);
+    timer1.setTimerType(TimerType.EVENT_SUBPROC);
     state.put(timer1);
 
     final TimerInstance timer2 = new TimerInstance();
     timer2.setElementInstanceKey(2L);
     timer2.setDueDate(2000L);
+    timer2.setTimerType(TimerType.START);
     state.put(timer2);
 
     final TimerInstance timer3 = new TimerInstance();
     timer3.setElementInstanceKey(3L);
     timer3.setDueDate(3000L);
+    timer3.setTimerType(TimerType.CATCH);
     state.put(timer3);
 
     // when
@@ -171,16 +185,19 @@ public class TimerInstanceStateTest {
     final TimerInstance timer1 = new TimerInstance();
     timer1.setElementInstanceKey(1L);
     timer1.setDueDate(1000L);
+    timer1.setTimerType(TimerType.EVENT_SUBPROC);
     state.put(timer1);
 
     final TimerInstance timer2 = new TimerInstance();
     timer2.setElementInstanceKey(1L);
     timer2.setDueDate(1000L);
+    timer2.setTimerType(TimerType.CATCH);
     state.put(timer2);
 
     final TimerInstance timer3 = new TimerInstance();
     timer3.setElementInstanceKey(3L);
     timer3.setDueDate(3000L);
+    timer3.setTimerType(TimerType.START);
     state.put(timer3);
 
     // when
@@ -196,11 +213,13 @@ public class TimerInstanceStateTest {
     final TimerInstance timer1 = new TimerInstance();
     timer1.setElementInstanceKey(1L);
     timer1.setDueDate(1000L);
+    timer1.setTimerType(TimerType.START);
     state.put(timer1);
 
     final TimerInstance timer2 = new TimerInstance();
     timer2.setElementInstanceKey(2L);
     timer2.setDueDate(2000L);
+    timer2.setTimerType(TimerType.EVENT_SUBPROC);
     state.put(timer2);
 
     // when
@@ -226,18 +245,21 @@ public class TimerInstanceStateTest {
     timer1.setElementInstanceKey(1L);
     timer1.setKey(1L);
     timer1.setDueDate(1000L);
+    timer1.setTimerType(TimerType.EVENT_SUBPROC);
     state.put(timer1);
 
     final TimerInstance timer2 = new TimerInstance();
     timer2.setElementInstanceKey(1L);
     timer2.setKey(2L);
     timer2.setDueDate(2000L);
+    timer2.setTimerType(TimerType.START);
     state.put(timer2);
 
     final TimerInstance timer3 = new TimerInstance();
     timer3.setElementInstanceKey(2L);
     timer3.setKey(3L);
     timer3.setDueDate(2000L);
+    timer3.setTimerType(TimerType.CATCH);
     state.put(timer3);
 
     // when

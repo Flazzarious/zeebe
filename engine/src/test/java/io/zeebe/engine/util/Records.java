@@ -14,6 +14,7 @@ import io.zeebe.protocol.impl.record.value.deployment.DeploymentRecord;
 import io.zeebe.protocol.impl.record.value.error.ErrorRecord;
 import io.zeebe.protocol.impl.record.value.job.JobRecord;
 import io.zeebe.protocol.impl.record.value.timer.TimerRecord;
+import io.zeebe.protocol.impl.record.value.timer.TimerRecord.TimerType;
 import io.zeebe.protocol.impl.record.value.workflowinstance.WorkflowInstanceRecord;
 import io.zeebe.protocol.record.RecordType;
 import io.zeebe.protocol.record.ValueType;
@@ -170,7 +171,8 @@ public class Records {
         .setDueDate(1245)
         .setTargetElementId(BufferUtil.wrapString("foo"))
         .setRepetitions(0)
-        .setWorkflowKey(1);
+        .setWorkflowKey(1)
+        .setTimerType(TimerType.START);
     return event;
   }
 }
