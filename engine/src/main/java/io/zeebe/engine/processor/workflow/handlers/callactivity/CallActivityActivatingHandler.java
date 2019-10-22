@@ -48,6 +48,10 @@ public class CallActivityActivatingHandler
     final var callActivityInstanceKey = context.getKey();
     copyVariables(callActivityInstanceKey, childWorkflowInstanceKey, workflow, context);
 
+    final var elementInstance = context.getElementInstance();
+    elementInstance.setChildInstanceKey(childWorkflowInstanceKey);
+    context.getElementInstanceState().updateInstance(elementInstance);
+
     return true;
   }
 

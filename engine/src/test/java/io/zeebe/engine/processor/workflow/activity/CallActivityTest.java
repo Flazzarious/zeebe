@@ -272,6 +272,36 @@ public class CallActivityTest {
         .contains(tuple(callActivityInstanceKey, "x", "2"), tuple(workflowInstanceKey, "y", "2"));
   }
 
+  @Test
+  public void shouldTerminateChildInstance() {
+    // given
+    final var workflowInstanceKey =
+        ENGINE.workflowInstance().ofBpmnProcessId(PROCESS_ID_PARENT).create();
+
+    assertThat(RecordingExporter.jobRecords(JobIntent.CREATED).withType(jobType).exists())
+        .describedAs("Expected job in child instance to be created")
+        .isTrue();
+
+    // when
+    ENGINE.workflowInstance().withInstanceKey(workflowInstanceKey).cancel();
+
+    // then
+    assertThat(
+            RecordingExporter.records()
+                .limitToWorkflowInstance(workflowInstanceKey)
+                .workflowInstanceRecords())
+        .extracting(r -> tuple(r.getValue().getBpmnElementType(), r.getIntent()))
+        .containsSubsequence(
+            tuple(BpmnElementType.PROCESS, WorkflowInstanceIntent.ELEMENT_TERMINATING),
+            tuple(BpmnElementType.CALL_ACTIVITY, WorkflowInstanceIntent.ELEMENT_TERMINATING),
+            tuple(BpmnElementType.PROCESS, WorkflowInstanceIntent.ELEMENT_TERMINATING),
+            tuple(BpmnElementType.SERVICE_TASK, WorkflowInstanceIntent.ELEMENT_TERMINATING),
+            tuple(BpmnElementType.SERVICE_TASK, WorkflowInstanceIntent.ELEMENT_TERMINATED),
+            tuple(BpmnElementType.PROCESS, WorkflowInstanceIntent.ELEMENT_TERMINATED),
+            tuple(BpmnElementType.CALL_ACTIVITY, WorkflowInstanceIntent.ELEMENT_TERMINATED),
+            tuple(BpmnElementType.PROCESS, WorkflowInstanceIntent.ELEMENT_TERMINATED));
+  }
+
   private void completeJobWith(Map<String, Object> variables) {
 
     RecordingExporter.jobRecords(JobIntent.CREATED).withType(jobType).getFirst().getValue();

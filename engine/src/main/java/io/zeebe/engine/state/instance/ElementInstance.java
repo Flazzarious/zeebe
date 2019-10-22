@@ -29,6 +29,9 @@ public class ElementInstance implements DbValue {
 
   private int multiInstanceLoopCounter = 0;
 
+  // TODO (saig0): think about the name
+  private long childInstanceKey = -1L;
+
   ElementInstance() {
     elementRecord = new IndexedRecord();
   }
@@ -138,6 +141,14 @@ public class ElementInstance implements DbValue {
     multiInstanceLoopCounter += 1;
   }
 
+  public long getChildInstanceKey() {
+    return childInstanceKey;
+  }
+
+  public void setChildInstanceKey(long childInstanceKey) {
+    this.childInstanceKey = childInstanceKey;
+  }
+
   @Override
   public void wrap(final DirectBuffer buffer, int offset, final int length) {
     final int startOffset = offset;
@@ -158,12 +169,15 @@ public class ElementInstance implements DbValue {
     multiInstanceLoopCounter = buffer.getInt(offset, ZB_DB_BYTE_ORDER);
     offset += Integer.BYTES;
 
+    childInstanceKey = buffer.getLong(offset, ZB_DB_BYTE_ORDER);
+    offset += Long.BYTES;
+
     assert (offset - startOffset) == length : "End offset differs from length";
   }
 
   @Override
   public int getLength() {
-    return 2 * Long.BYTES + 4 * Integer.BYTES + elementRecord.getLength();
+    return 3 * Long.BYTES + 4 * Integer.BYTES + elementRecord.getLength();
   }
 
   @Override
@@ -187,6 +201,9 @@ public class ElementInstance implements DbValue {
     buffer.putInt(offset, multiInstanceLoopCounter, ZB_DB_BYTE_ORDER);
     offset += Integer.BYTES;
 
+    buffer.putLong(offset, childInstanceKey, ZB_DB_BYTE_ORDER);
+    offset += Long.BYTES;
+
     assert (offset - startOffset) == getLength() : "End offset differs from getLength()";
   }
 
@@ -209,6 +226,8 @@ public class ElementInstance implements DbValue {
         + activeTokens
         + ", multiInstanceLoopCounter="
         + multiInstanceLoopCounter
+        + ", childInstanceKey="
+        + childInstanceKey
         + '}';
   }
 }
