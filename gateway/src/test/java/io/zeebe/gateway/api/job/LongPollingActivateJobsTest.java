@@ -7,8 +7,6 @@
  */
 package io.zeebe.gateway.api.job;
 
-import static io.zeebe.gateway.api.util.StubbedGateway.FAILED_RESPONSE_THRESHOLD;
-import static io.zeebe.gateway.api.util.StubbedGateway.LONG_POLLING_TIMEOUT;
 import static io.zeebe.test.util.TestUtil.waitUntil;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,30 +16,47 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import io.grpc.stub.StreamObserver;
-import io.zeebe.gateway.api.util.GatewayTest;
+import io.zeebe.gateway.api.util.StubbedBrokerClient;
 import io.zeebe.gateway.impl.job.LongPollingActivateJobsHandler;
 import io.zeebe.gateway.impl.job.LongPollingActivateJobsRequest;
 import io.zeebe.gateway.protocol.GatewayOuterClass.ActivateJobsRequest;
 import io.zeebe.gateway.protocol.GatewayOuterClass.ActivateJobsResponse;
+import io.zeebe.util.sched.clock.ControlledActorClock;
+import io.zeebe.util.sched.testing.ActorSchedulerRule;
 import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-public class LongPollingActivateJobsTest extends GatewayTest {
+public class LongPollingActivateJobsTest {
 
   private static final String TYPE = "test";
+
+  private static final long LONG_POLLING_TIMEOUT = 5000;
+  private static final long PROBE_TIMEOUT = 20000;
+  private static final int FAILED_RESPONSE_THRESHOLD = 3;
+  protected ControlledActorClock actorClock = new ControlledActorClock();
+  @Rule public ActorSchedulerRule actorSchedulerRule = new ActorSchedulerRule(actorClock);
   private LongPollingActivateJobsHandler handler;
   private ActivateJobsStub stub;
   private int partitionsCount;
+  private final StubbedBrokerClient brokerClient = new StubbedBrokerClient();
 
   @Before
   public void setup() {
-    handler = gateway.getLongPollingHandler();
+    handler =
+        LongPollingActivateJobsHandler.newBuilder()
+            .setBrokerClient(brokerClient)
+            .setLongPollingTimeout(LONG_POLLING_TIMEOUT)
+            .setProbeTimeoutMillis(PROBE_TIMEOUT)
+            .setMinEmptyResponses(FAILED_RESPONSE_THRESHOLD)
+            .build();
+    actorSchedulerRule.submitActor(handler);
     stub = spy(new ActivateJobsStub());
-    stub.registerWith(gateway);
+    stub.registerWith(brokerClient);
     stub.addAvailableJobs(TYPE, 0);
     partitionsCount = brokerClient.getTopologyManager().getTopology().getPartitionsCount();
   }
@@ -71,7 +86,7 @@ public class LongPollingActivateJobsTest extends GatewayTest {
     waitUntil(() -> request.hasScheduledTimer());
     stub.addAvailableJobs(TYPE, 1);
     verify(responseSpy, times(0)).onCompleted();
-    gateway.notifyJobsAvailable(TYPE);
+    brokerClient.notifyJobsAvailable(TYPE);
 
     // then
     verify(responseSpy, timeout(2000).times(1)).onNext(any());
@@ -113,7 +128,7 @@ public class LongPollingActivateJobsTest extends GatewayTest {
 
     // when
     stub.addAvailableJobs(TYPE, 1);
-    gateway.notifyJobsAvailable(TYPE);
+    brokerClient.notifyJobsAvailable(TYPE);
 
     // then
     verify(stub, timeout(2000).times(2 * amount * partitionsCount)).handle(any());
@@ -145,7 +160,7 @@ public class LongPollingActivateJobsTest extends GatewayTest {
     // when
     final LongPollingActivateJobsRequest successRequest = getLongPollingActivateJobsRequest();
     stub.addAvailableJobs(TYPE, 1);
-    gateway.notifyJobsAvailable(TYPE);
+    brokerClient.notifyJobsAvailable(TYPE);
     handler.activateJobs(successRequest);
 
     // then
@@ -279,7 +294,7 @@ public class LongPollingActivateJobsTest extends GatewayTest {
     actorClock.addTime(Duration.ofMillis(requestTimeout));
     waitUntil(() -> shortRequest.isTimedOut());
     stub.addAvailableJobs(TYPE, 2);
-    gateway.notifyJobsAvailable(TYPE);
+    brokerClient.notifyJobsAvailable(TYPE);
 
     // then
     assertThat(longRequest.isTimedOut()).isFalse();
