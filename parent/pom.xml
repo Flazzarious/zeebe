@@ -60,7 +60,7 @@
     <version.log4j>2.12.1</version.log4j>
     <version.mockito>3.1.0</version.mockito>
     <version.model>7.7.0</version.model>
-    <version.msgpack>0.8.16</version.msgpack>
+    <version.msgpack>0.8.21</version.msgpack>
     <version.netty>4.1.39.Final</version.netty>
     <version.netty-tcnative>2.0.26.Final</version.netty-tcnative>
     <version.objenesis>3.1</version.objenesis>
@@ -800,7 +800,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore />
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -893,7 +893,7 @@
               </goals>
               <configuration>
                 <rules>
-                  <dependencyConvergence />
+                  <dependencyConvergence/>
                 </rules>
               </configuration>
             </execution>
