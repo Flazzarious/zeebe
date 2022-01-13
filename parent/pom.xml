@@ -65,7 +65,7 @@
     <version.netty-tcnative>2.0.26.Final</version.netty-tcnative>
     <version.objenesis>3.1</version.objenesis>
     <version.prometheus>0.7.0</version.prometheus>
-    <version.protobuf>3.10.0</version.protobuf>
+    <version.protobuf>3.16.1</version.protobuf>
     <version.rocksdbjni>6.2.2</version.rocksdbjni>
     <version.sbe>1.13.3</version.sbe>
     <version.scala-parser>1.1.2</version.scala-parser>
@@ -800,7 +800,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore />
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -893,7 +893,7 @@
               </goals>
               <configuration>
                 <rules>
-                  <dependencyConvergence />
+                  <dependencyConvergence/>
                 </rules>
               </configuration>
             </execution>
